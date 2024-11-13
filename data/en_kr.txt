@@ -1,0 +1,26 @@
+Hello, how are you?	안녕하세요, 어떻게 지내세요?
+What is your name?	당신의 이름은 무엇인가요?
+I’m fine, thank you.	잘 지내요, 감사합니다.
+Where are you from?	어디에서 오셨나요?
+Please sit down.	앉아주세요.
+Don’t touch that!	그것을 만지지 마세요!
+Could you help me, please?	도와주실 수 있나요?
+What time is it?	지금 몇 시인가요?
+It’s 3 o’clock.	3시입니다.
+How much does it cost?	가격이 얼마인가요?
+It costs ten dollars.	10달러입니다.
+Where is the nearest subway station?	가장 가까운 지하철역은 어디인가요?
+I would like to go to the airport.	공항으로 가고 싶어요.
+Do you have a map?	지도 있나요?
+I’d like a coffee, please.	커피 한 잔 주세요.
+Can I see the menu?	메뉴를 볼 수 있을까요?
+Is this dish spicy?	이 요리는 매운가요?
+I need to go to the supermarket.	나는 슈퍼마켓에 가야 해요.
+The weather is nice today.	오늘 날씨가 좋네요.
+I don’t feel well.	몸이 좋지 않아요.
+I woke up at 7 AM.	나는 오전 7시에 일어났어요.
+What are you doing this weekend?	이번 주말에 뭐 하세요?
+See you tomorrow.	내일 봐요.
+I am happy today.	나는 오늘 행복해요.
+He is very angry.	그는 매우 화가 났어요.
+I am a little tired.	나는 조금 피곤해요.
