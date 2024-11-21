@@ -4,20 +4,25 @@ import torch.nn as nn
 class Transformer(nn.Module):
     def __init__(self, vocab_size, d_model, position, num_heads, num_encoder_layers, num_decoder_layers):
         super().__init__()
-        self.embedding = self.Embedding(vocab_size, d_model)
+        self.input_embedding = self.Embedding(vocab_size, d_model)
+        self.output_embedding = self.Embedding(vocab_size, d_model)
         self.positional_encoding = self.PositionalEncoding(position, d_model)
         self.encoders = nn.ModuleList([self.Encoder(d_model, num_heads) for _ in range(num_encoder_layers)])
         self.decoders = nn.ModuleList([self.Decoder(d_model, num_heads) for _ in range(num_decoder_layers)])
-
+        self.output_linear = nn.Linear(d_model, vocab_size)
     def forward(self, x1, x2, mask):
-        x1 = self.embedding(x1)
+        x1 = self.input_embedding(x1)
         x1 = torch.add(x1, self.positional_encoding(x1))
+        x2 = self.output_embedding(x2)
+        x2 = torch.add(x2, self.positional_encoding(x2))
         for encoder in self.encoders:
             x1 = encoder(x1, mask)
         for decoder in self.decoders:
             x2 = decoder(x1, x2, mask)
+
+        logits = self.output_linear(x2)
         
-        return x2
+        return logits
 
     class Embedding(nn.Module):
         def __init__(self, vocab_size, embeddding_dim):
@@ -44,7 +49,8 @@ class Transformer(nn.Module):
     class MultiHeadAttention(nn.Module):
         def __init__(self, d_model, num_heads):
             super().__init__()
-            
+            self.d_model = d_model
+            self.num_heads = num_heads
             assert d_model%num_heads == 0, "Embedding size must be divisible by number of heads"
             self.d_head = d_model//num_heads
             self.query = nn.Linear(d_model, d_model)
@@ -64,6 +70,7 @@ class Transformer(nn.Module):
 
             attention = torch.matmul(Q, K.transpose(-2,-1))/(self.d_head**0.5)
             if mask is not None:
+                mask = mask.unsqueeze(1).unsqueeze(2)
                 attention = attention.masked_fill(mask==0, float("-inf"))
             attention = torch.softmax(attention, dim=-1)
             if attention.size(-2) != queries.size(-2) or attention.size(-1) != keys.size(-2):
@@ -124,19 +131,12 @@ class Transformer(nn.Module):
             self.cross_attn_residual = Transformer.Residual(d_model)
             self.ffn = Transformer.FeedForward(d_model)
             self.ffn_residual = Transformer.Residual(d_model)
-            self.query_layer = nn.Linear(d_model, d_model)
-            self.key_layer = nn.Linear(d_model, d_model)
-            self.value_layer = nn.Linear(d_model, d_model)
-            self.cross_attn_key_layer = nn.Linear(d_model, d_model)
-            self.cross_attn_value_layer = nn.Linear(d_model, d_model)
             self.self_attn_query_layer = nn.Linear(d_model, d_model)
 
         def forward(self, encoder_out, x, mask):
             masked_attn_out = self.self_attn(x, x, x, mask)
             masked_attn_out = self.self_attn_residual(x, masked_attn_out)
-            encoder_key = self.cross_attn_key_layer(encoder_out)
-            encoder_value = self.cross_attn_value_layer(encoder_out)
-            attn_out = self.cross_attn(masked_attn_out, encoder_key, encoder_value, None)
+            attn_out = self.cross_attn(masked_attn_out, encoder_out, encoder_out, None)
             attn_out = self.cross_attn_residual(masked_attn_out, attn_out)
             ffn_out = self.ffn(attn_out)
             out = self.ffn_residual(attn_out, ffn_out)
